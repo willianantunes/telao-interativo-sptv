@@ -1,0 +1,38 @@
+camel:
+  springboot:
+    name: telao-interativo-sptv
+
+spring:
+    main:
+        banner-mode: "off"
+    jpa:
+        generate-ddl: true
+        show-sql: true
+        hibernate:
+            ddl-auto: create-drop
+    h2:
+        console:
+            enabled: true
+            path: /h2            
+    security:
+        enabled: false        
+
+camel.component.twitter.consumer-key: YOUR-CONSUMER-KEY
+camel.component.twitter.consumer-secret: YOUR-CONSUMER-SECRET
+camel.component.twitter.access-token: YOUR-ACCESS-TOKEN
+camel.component.twitter.access-token-secret: YOUR-ACESS-TOKEN-SECRET
+
+custom.twitter.delay-each-request: 5000
+custom.twitter.keywords: "#SP1"
+
+custom.scheduler.delay-each-read: 10000
+
+---
+
+spring:
+    profiles: development
+
+---
+
+spring:
+    profiles: it         
