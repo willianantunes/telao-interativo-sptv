@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 	@NamedQuery(name = TwitterMessage.NAMED_QUERY_DELETE_ALL, query = "DELETE FROM TwitterMessage")
 })
 public class TwitterMessage {
+	
 	public static final String NAMED_QUERY_SELECT_ALL = "SELECT-ALL";
 	public static final String NAMED_QUERY_DELETE_ALL = "DELETE-ALL";
 	
