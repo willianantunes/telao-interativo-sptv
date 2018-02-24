@@ -118,6 +118,13 @@ public class PrepareTweetsAndEvaluateThemRoutesIT {
 			}
 		});
 		
+		camelContext.getRouteDefinition(ReadQueueAndSaveEachMessageRoute.ROUTE_ID).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
+			@Override
+			public void configure() throws Exception {
+				replaceFromWith("direct:read-activemq"); 
+			}
+		});		
+		
 		camelContext.getRouteDefinition(PrepareTweetsAndEvaluateThemRoutes.ROUTE_ID_MESSAGE_COUNTER).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
 			@Override
 			public void configure() throws Exception {

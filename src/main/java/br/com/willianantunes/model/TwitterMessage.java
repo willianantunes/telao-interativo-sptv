@@ -20,12 +20,14 @@ import lombok.NoArgsConstructor;
 @Entity @Table(name = "TB_TWITTER_MESSAGE")
 @NamedQueries({
 	@NamedQuery(name = TwitterMessage.NAMED_QUERY_SELECT_ALL, query = "SELECT t FROM TwitterMessage t"),
-	@NamedQuery(name = TwitterMessage.NAMED_QUERY_DELETE_ALL, query = "DELETE FROM TwitterMessage")
+	@NamedQuery(name = TwitterMessage.NAMED_QUERY_DELETE_ALL, query = "DELETE FROM TwitterMessage"),
+	@NamedQuery(name = TwitterMessage.NAMED_QUERY_DELETE_ONE, query = "DELETE FROM TwitterMessage t WHERE t.id = :id")
 })
 public class TwitterMessage {
 	
 	public static final String NAMED_QUERY_SELECT_ALL = "SELECT-ALL";
 	public static final String NAMED_QUERY_DELETE_ALL = "DELETE-ALL";
+	public static final String NAMED_QUERY_DELETE_ONE = "DELETE-ONE";
 	
 	@Id
 	@GeneratedValue
