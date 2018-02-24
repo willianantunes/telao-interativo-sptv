@@ -2,8 +2,15 @@ package br.com.willianantunes.support;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -22,20 +29,41 @@ import lombok.Getter;
 
 @Component
 public class ScenarioBuilder {
+	
 	@Autowired
 	private TwitterMessageRepository twitterMessageRepository;
+	@PersistenceContext
+	private EntityManager entityManager;	
 	
 	@Getter
 	private List<TwitterMessage> twitterMessages;	
 	
-	public ScenarioBuilder prepareDummyTweets() {
-		twitterMessages = loadObjectList(TwitterMessage.class, "twitter-messages.csv");
+	public ScenarioBuilder prepareDummyTweets(Integer desiredMaxSize) {
+		twitterMessages = loadObjectList(TwitterMessage.class, "twitter-messages.csv")
+				.stream().limit(desiredMaxSize).collect(Collectors.toList());
 		
 		return this;
 	}
 	
 	public void build() {
 		Optional.ofNullable(twitterMessages).ifPresent(twitterMessageRepository::save);
+	}
+	
+	@Transactional
+	public ScenarioBuilder unbuild() {
+		Query createNativeQuery = entityManager.createNativeQuery("SHOW TABLES");
+		Object[] minhasTabelas = (Object[]) createNativeQuery.getResultList().get(0);
+		
+		Arrays.stream(minhasTabelas)
+			.map(o -> o.toString())
+			.filter(s -> s.startsWith("TB_"))
+			.forEach(t -> entityManager.createNativeQuery("truncate table " + t).executeUpdate());;
+		
+		return this;
+	}	
+	
+	public Iterable<TwitterMessage> allTwitterMessagesSaved() {
+		return twitterMessageRepository.findAll();
 	}
 	
 	private <T> List<T> loadObjectList(Class<T> type, String fileName) {

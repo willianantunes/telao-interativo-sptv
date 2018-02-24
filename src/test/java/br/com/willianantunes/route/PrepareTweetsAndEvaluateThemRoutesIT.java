@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.google.common.collect.Iterables;
 import com.palantir.docker.compose.DockerComposeRule;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 
@@ -53,7 +54,9 @@ public class PrepareTweetsAndEvaluateThemRoutesIT {
 	private ScenarioBuilder scenarioBuilder;
 	
     @EndpointInject(uri = "mock:result-fist-route-id-queue")
-    private MockEndpoint mockedResultFirstRouteIdQueue;   	
+    private MockEndpoint mockedResultFirstRouteIdQueue;
+    @EndpointInject(uri = "mock:result-before-activemq-route-id-queue")
+    private MockEndpoint mockedResultBeforeActiveMQFilterRouteIdQueue;    
 	
 	@Before
 	public void setUp() throws Exception {
@@ -69,21 +72,42 @@ public class PrepareTweetsAndEvaluateThemRoutesIT {
 
 		Assertions.assertThat(routeMessageCounter).isNotNull();
 		Assertions.assertThat(routeQueue).isNotNull();
-	}    
+	}
 	
-	@Test
-	public void messagesAreForwardedToQueueRoute() {
-		scenarioBuilder.prepareDummyTweets().build();		
+	@Test	
+	public void messagesAreForwardedToQueueRouteAndNotQueued() {
+		scenarioBuilder.unbuild().prepareDummyTweets(15).build();
 		producerTemplate.sendBody("direct:evaluate-database", null);
 		
-		Optional<Exchange> myExchange = mockedResultFirstRouteIdQueue.getReceivedExchanges().stream().findAny();
+		Optional<Exchange> storageFromFirstNode = Optional.ofNullable(Iterables.getLast(mockedResultFirstRouteIdQueue.getReceivedExchanges(), null));
+		Optional<Exchange> storageFromBeforeActiveMQ = Optional.ofNullable(Iterables.getLast(mockedResultBeforeActiveMQFilterRouteIdQueue.getReceivedExchanges(), null));
 		
-		Assertions.assertThat(myExchange.isPresent()).isTrue();
-		Assertions.assertThat(myExchange.get())
+		Assertions.assertThat(storageFromBeforeActiveMQ.isPresent()).isFalse();
+		Assertions.assertThat(storageFromFirstNode.isPresent()).isTrue();
+		Assertions.assertThat(storageFromFirstNode.get())
 			.satisfies(e -> {
 				Assertions.assertThat(e.getIn().getBody(List.class))
 					.hasSize(scenarioBuilder.getTwitterMessages().size());
 			});
+		Assertions.assertThat(scenarioBuilder.allTwitterMessagesSaved()).hasSize(scenarioBuilder.getTwitterMessages().size());
+	}
+	
+	@Test
+	public void messagesAreForwardToQueueRouteAndQueuedAndRepositoryIsEmpty() {
+		scenarioBuilder.unbuild().prepareDummyTweets(16).build();
+		producerTemplate.sendBody("direct:evaluate-database", null);
+		
+		Optional<Exchange> storageFromFirstNode = Optional.ofNullable(Iterables.getLast(mockedResultFirstRouteIdQueue.getReceivedExchanges(), null));
+		Optional<Exchange> storageFromBeforeActiveMQ = Optional.ofNullable(Iterables.getLast(mockedResultBeforeActiveMQFilterRouteIdQueue.getReceivedExchanges(), null));
+		
+		Assertions.assertThat(storageFromBeforeActiveMQ.isPresent()).isTrue();
+		Assertions.assertThat(storageFromFirstNode.isPresent()).isTrue();
+		Assertions.assertThat(storageFromFirstNode.get())
+			.satisfies(e -> {
+				Assertions.assertThat(e.getIn().getBody(List.class))
+					.hasSize(scenarioBuilder.getTwitterMessages().size());
+			});		
+		Assertions.assertThat(scenarioBuilder.allTwitterMessagesSaved()).isEmpty();
 	}
 	
 	private void prepareCamelEnvironment() throws Exception {
@@ -105,6 +129,7 @@ public class PrepareTweetsAndEvaluateThemRoutesIT {
 			@Override
 			public void configure() throws Exception {
 				weaveAddFirst().to("mock:result-fist-route-id-queue");
+				interceptSendToEndpoint("activemq:queue:Tweets.Trends").to("mock:result-before-activemq-route-id-queue");
 			}
 		});			
 		

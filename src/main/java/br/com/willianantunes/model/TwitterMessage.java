@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 
 @Data @Builder
 @AllArgsConstructor @NoArgsConstructor
-@Entity
+@Entity @Table(name = "TB_TWITTER_MESSAGE")
 @NamedQueries({
 	@NamedQuery(name = TwitterMessage.NAMED_QUERY_SELECT_ALL, query = "SELECT t FROM TwitterMessage t"),
 	@NamedQuery(name = TwitterMessage.NAMED_QUERY_DELETE_ALL, query = "DELETE FROM TwitterMessage")

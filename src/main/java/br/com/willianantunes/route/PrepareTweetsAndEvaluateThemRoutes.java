@@ -42,7 +42,5 @@ public class PrepareTweetsAndEvaluateThemRoutes extends RouteBuilder {
 				.log("All of the rows were sent to the queue Tweets.Trends")
 				.toF("jpa:%s?namedQuery=%s&useExecuteUpdate=%s", TwitterMessage.class.getName(), "DELETE-ALL", true)
 				.log("The table was truncated...");        
-	}
-	
-	
+	}	
 }
