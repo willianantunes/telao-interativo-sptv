@@ -27,12 +27,11 @@ custom.twitter.keywords: "#SP1"
 
 custom.scheduler.delay-each-read: 10000
 
----
-
-spring:
-    profiles: development
+custom.brokerURL: tcp://localhost:61616?jms.prefetchPolicy.all=1
 
 ---
 
 spring:
-    profiles: it         
+    profiles: it
+    
+custom.brokerURL: tcp://localhost:${activemq.port}?jms.prefetchPolicy.all=1    
