@@ -1,8 +1,10 @@
 camel:
   springboot:
-    name: telao-interativo-sptv
+    name: camel-context-telao-interativo-sptv
 
 spring:
+    application:
+        name: telao-interativo-sptv
     main:
         banner-mode: "off"
     jpa:
