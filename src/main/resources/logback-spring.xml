@@ -45,8 +45,10 @@
 	    </rollingPolicy>
 	</appender>
 
-   	<logger name="org.springframework" level="INFO" />    	  
+   	<logger name="org.springframework" level="INFO" />
+   	<logger name="org.apache.camel.component.websocket" level="DEBUG" />
 	<logger name="br.com.willianantunes" level="DEBUG" />
+	
     
 	<root level="INFO">
 		<appender-ref ref="CONSOLE" />

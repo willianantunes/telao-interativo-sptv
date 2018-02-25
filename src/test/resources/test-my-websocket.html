@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My WebSocket Test Page</title>
+<script type='text/javascript'>
+	if (!window.WebSocket)
+		alert("WebSocket not supported by this browser");
+
+	var exampleSocket = new WebSocket("ws://localhost:3030/test");
+
+	exampleSocket.onmessage = function(event) {
+		var message = JSON.parse(event.data);
+		
+		console.log('A message from the Twitter account ' + message.userName + ' has arrived!');
+		
+		var msgBox = document.getElementsByClassName('messages')[0];
+		var spanText = document.createElement('span');
+		spanText.className = 'text';
+		spanText.innerHTML = JSON.stringify(message);
+		var lineBreak = document.createElement('br');
+		msgBox.appendChild(spanText);
+		msgBox.appendChild(lineBreak);
+		msgBox.scrollTop = msgBox.scrollHeight - msgBox.clientHeight;
+	}
+	
+	exampleSocket.onclose = function(event) {
+		exampleSocket = null;
+	}
+</script>
+<style type='text/css'>
+.messages {
+	border: 0px solid black;
+	clear: both;
+	width: 40em;
+	height: 20ex;
+	overflow: auto;
+	background-color: #f0f0f0;
+	padding: 4px;
+	border: 1px solid black;
+}
+</style>
+</head>
+<body>
+	<div class='messages'></div>
+</body>
+</html>
