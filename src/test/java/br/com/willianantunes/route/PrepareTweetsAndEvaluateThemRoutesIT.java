@@ -122,6 +122,8 @@ public class PrepareTweetsAndEvaluateThemRoutesIT {
 			@Override
 			public void configure() throws Exception {
 				replaceFromWith("direct:read-activemq"); 
+				weaveByToUri("websocket://localhost:8095/tweetsTrends?sendToAll=true")
+					.replace().to("direct:websocket-server");				
 			}
 		});		
 		

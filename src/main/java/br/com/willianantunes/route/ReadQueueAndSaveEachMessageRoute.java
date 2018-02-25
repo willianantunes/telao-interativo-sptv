@@ -21,6 +21,7 @@ public class ReadQueueAndSaveEachMessageRoute extends RouteBuilder {
 	    	.log("The following twitter user is passing by: ${body.userName}")
 	    	.setHeader("CamelFileName", simple("${body.userName}-${date:now:yyyyMMdd-hhmmss}.json"))
 	    	.marshal().json(JsonLibrary.Jackson).convertBodyTo(String.class)
-	    	.to("file:" + temporaryDirectory);
+	    	.to("file:" + temporaryDirectory)
+	    	.to("websocket://localhost:8095/tweetsTrends?sendToAll=true");
 	}	
 }

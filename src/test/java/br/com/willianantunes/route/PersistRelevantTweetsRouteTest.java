@@ -47,7 +47,7 @@ public class PersistRelevantTweetsRouteTest {
 	@Before
 	public void setUp() throws Exception {
 		if (!camelContext.getStatus().isStarted()) {
-			replaceStandardFromToDirectComponent();
+			prepareCamelEnvironment();
 		}
 	}
 
@@ -106,7 +106,7 @@ public class PersistRelevantTweetsRouteTest {
 		return mock;
 	}
 
-	private void replaceStandardFromToDirectComponent() throws Exception {
+	private void prepareCamelEnvironment() throws Exception {
 		camelContext.getRouteDefinition(PersistRelevantTweetsRoute.ROUTE_ID).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
 			@Override
 			public void configure() throws Exception {
@@ -115,6 +115,15 @@ public class PersistRelevantTweetsRouteTest {
 				weaveByToUri("jpa*").after().to("mock:result-after-insert");
 			}
 		});
+		
+		camelContext.getRouteDefinition(ReadQueueAndSaveEachMessageRoute.ROUTE_ID).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
+			@Override
+			public void configure() throws Exception {
+				replaceFromWith("direct:read-activemq");
+				weaveByToUri("websocket://localhost:8095/tweetsTrends?sendToAll=true")
+					.replace().to("direct:websocket-server");
+			}
+		});	
 		
 		camelContext.start();
 	}	
