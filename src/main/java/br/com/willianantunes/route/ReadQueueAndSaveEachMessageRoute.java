@@ -26,6 +26,6 @@ public class ReadQueueAndSaveEachMessageRoute extends RouteBuilder {
 	    	.setHeader("CamelFileName", simple("${body.userName}-${date:now:yyyyMMdd-hhmmss}.json"))
 	    	.marshal().json(JsonLibrary.Jackson).convertBodyTo(String.class)
 	    	.to("file:" + temporaryDirectory)
-	    	.toF("websocket://0.0.0.0:%s/tweetsTrends?sendToAll=true", port);
+	    	.toF("websocket://0.0.0.0:%s/tweetsTrends?sendToAll=true&staticResources=classpath:.", port);
 	}	
 }

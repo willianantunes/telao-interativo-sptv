@@ -93,7 +93,7 @@ public class WebSocketProducerOnlyTest {
 
 		private void setUpWebSocketComponent() {
             WebsocketComponent component = getContext().getComponent("websocket", WebsocketComponent.class);
-            component.setHost("localhost");
+            component.setHost("0.0.0.0");
             component.setPort(3030);
             component.setStaticResources("classpath:.");	
 		}

@@ -28,9 +28,9 @@ $(document).ready(function(){
 		
 		var insertion = '<div class="container-fluid"><div class="row"><div class="col-4">';
 		insertion += String.format('<img class="rounded-circle" src="https://twitter.com/{0}/profile_image?size=bigger"' +
-				'alt="Avatar da conta no Twitter" width="140" height="140"><h2><a href="https://twitter.com/{0}" ' +
-				'target="_blank" class="text-white">{1}</a></h2></div>',
-				account.userName, account.screenName);
+				'alt="Avatar da conta no Twitter" width="140" height="140"><h2><a href="https://twitter.com/{1}" ' +
+				'target="_blank" class="text-white">{2}</a></h2></div>',
+				account.screenName, account.screenName, account.userName);
 		insertion += '<div class="col-8 justify-content-center align-self-center">';
 		insertion += String.format('<p class="text-left lead text-white">{0}</p></div></div></div>', account.text);
 		
