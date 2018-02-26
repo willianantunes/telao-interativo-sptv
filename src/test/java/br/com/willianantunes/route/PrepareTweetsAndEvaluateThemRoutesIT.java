@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.PropertyInject;
 import org.apache.camel.Route;
 import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -51,6 +52,8 @@ public class PrepareTweetsAndEvaluateThemRoutesIT {
     @Autowired
     private ScenarioBuilder scenarioBuilder;
 
+    @PropertyInject("custom.websocket-port")
+    private String webSocketport;    
     @EndpointInject(uri = "mock:result-fist-route-id-queue")
     private MockEndpoint mockedResultFirstRouteIdQueue;
     @EndpointInject(uri = "mock:result-before-activemq-route-id-queue")
@@ -123,7 +126,7 @@ public class PrepareTweetsAndEvaluateThemRoutesIT {
                     @Override
                     public void configure() throws Exception {
                         replaceFromWith("direct:read-activemq");
-                        weaveByToUri("websocket://localhost:8095/tweetsTrends?sendToAll=true").replace()
+                        weaveByToUri("websocket://0.0.0.0:" + webSocketport + "/tweetsTrends?sendToAll=true&staticResources=classpath:.").replace()
                                 .to("direct:websocket-server");
                     }
                 });
