@@ -60,6 +60,12 @@ Expliquei um passo-a-passo no YouTube. Acesse no link abaixo:
 
 [![Telão Interativo SPTV](http://img.youtube.com/vi/jgDDEfS8rZw/0.jpg)](http://www.youtube.com/watch?v=jgDDEfS8rZw "Telão Interativo estilo SPTV com Apache Camel")
 
+### Erros conhecidos
+
+Os testes funcionam OK no Linux, menos no Windows. Se você tentou construir pelo Windows talvez tenha pego um erro no teste unitário da classe ReadQueueAndSaveEachMessageRouteTest pois o payload processado não casa com o esperado. O porquê é simples. No Windows ele interpreta quebra de linha com _carriage return_ e _line feed_ enquanto no teste está apenas com _line feed_. Pra passar, substitua todos *\n* por *\r\n* que o teste passa. 
+
+Só não faço a correção definitiva pois fica como lição honesta pra quem seguir adiante com esse projeto para algum fim. Nunca é tarde para lembrar que é sempre bom testar no sistema operacional alvo!
+
 # Veja no GloboPlay como funciona
 
 Procure por _SP1 estreia novo estúdio e telões interativos_ ou acesse [aqui](https://globoplay.globo.com/v/5853464/) enquanto ainda estiver disponível.
