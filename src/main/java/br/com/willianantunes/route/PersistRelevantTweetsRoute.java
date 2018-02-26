@@ -39,7 +39,7 @@ public class PersistRelevantTweetsRoute extends RouteBuilder {
 	public void configure() throws Exception {
 		setUpTwitterComponent();
 		
-		fromF("twitter-search:type=polling&delay=%s&keywords=%s", delay, keywords)
+		fromF("twitter-search:%s?type=polling&delay=%s", keywords, delay)
 	    	.routeId(ROUTE_ID)
 	    	.log(LoggingLevel.DEBUG, "The user named ${body.user.name} posted the following text at ${body.createdAt}: ${body.text}")
 	    	.process(getTweetAndPrepareItToBePersisted())
