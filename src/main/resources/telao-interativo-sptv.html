@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Painel Interativo SPTV</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script type='text/javascript'>
+$(document).ready(function(){
+	String.format = function() {
+	    var theString = arguments[0];
+	    
+	    for (var i = 1; i < arguments.length; i++) {
+	        var regEx = new RegExp("\\{" + (i - 1) + "\\}", "gm");
+	        theString = theString.replace(regEx, arguments[i]);
+	    }
+	    
+	    return theString;
+	};
+	
+	window.insertMyTweet = function(account) {
+		if ($('main .container-fluid').length > 0) {
+			$("main").append('<hr />');
+		}
+		
+		var insertion = '<div class="container-fluid"><div class="row"><div class="col-4">';
+		insertion += String.format('<img class="rounded-circle" src="https://twitter.com/{0}/profile_image?size=bigger"' +
+				'alt="Avatar da conta no Twitter" width="140" height="140"><h2><a href="https://twitter.com/{0}" ' +
+				'target="_blank" class="text-white">{1}</a></h2></div>',
+				account.userName, account.screenName);
+		insertion += '<div class="col-8 justify-content-center align-self-center">';
+		insertion += String.format('<p class="text-left lead text-white">{0}</p></div></div></div>', account.text);
+		
+		$("main").append(insertion);	
+	}
+	
+	if (!window.WebSocket)
+		alert("WebSocket not supported by this browser");
+
+	var exampleSocket = new WebSocket("ws://localhost:8095/tweetsTrends");
+
+	exampleSocket.onmessage = function(event) {
+		var message = JSON.parse(event.data);
+		
+		console.log('A message from the Twitter account ' + message.userName + ' has arrived!');
+		
+		window.insertMyTweet(message);
+		var n = $(document).height();
+	    $('html, body').animate({ scrollTop: n }, 1000);
+	}
+
+	
+	exampleSocket.onclose = function(event) {
+		exampleSocket = null;
+	}
+});
+</script>
+<style type="text/css">
+main .container-fluid .col-4 img {
+	margin-top: .5rem;
+}
+
+main .container-fluid {
+	text-align: center;
+}
+
+header .jumbotron {
+	margin-bottom: 0;
+}
+
+hr {
+	margin: 0;
+}
+
+</style>
+</head>
+<body>
+<header>
+	<div class="jumbotron jumbotron-fluid">
+		<div class="container">
+			<h1 class="display-10">Painel Interativo estilo SPTV</h1>
+			<p class="lead-5">Veja meu Blogger, GitHub e outras mídias sociais/técnicas para conhecer mais!</p>
+			<ul>
+				<li>LinkedIn: <a href="https://www.linkedin.com/in/willianantunes/" target="_blank">linkedin.com/in/willianantunes</a></li>
+				<li>Blogger: <a href="http://willianantunes.blogspot.com.br/" target="_blank">willianantunes.blogspot.com.br</a></li>
+				<li>GitHub: <a href="https://github.com/willianantunes" target="_blank">github.com/willianantunes</a></li>
+				<li>Udemy: <a href="https://www.udemy.com/user/willian-antunes/" target="_blank">udemy.com/user/willian-antunes</a></li>
+				<li>Alura: <a href="https://cursos.alura.com.br/user/willian-lima-antunes" target="_blank">cursos.alura.com.br/user/willian-lima-antunes</a></li>
+				<li>Docker Hub: <a href="https://hub.docker.com/u/willianantunes/" target="_blank">hub.docker.com/u/willianantunes</a></li>
+			</ul>
+		</div>				
+	</div>
+</header>
+<main class="bg-info">
+	
+</main>
+</body>
+</html>

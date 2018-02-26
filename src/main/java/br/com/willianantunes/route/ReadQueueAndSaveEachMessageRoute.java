@@ -1,5 +1,6 @@
 package br.com.willianantunes.route;
 
+import org.apache.camel.PropertyInject;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,9 @@ import br.com.willianantunes.model.TwitterMessage;
 public class ReadQueueAndSaveEachMessageRoute extends RouteBuilder {
 	
 	public static final String ROUTE_ID = "ConsumerTweetQueueRoute";
+	
+	@PropertyInject("custom.websocket-port")
+	private String port;	
 
 	private String temporaryDirectory = System.getProperty("java.io.tmpdir");
 	
@@ -22,6 +26,6 @@ public class ReadQueueAndSaveEachMessageRoute extends RouteBuilder {
 	    	.setHeader("CamelFileName", simple("${body.userName}-${date:now:yyyyMMdd-hhmmss}.json"))
 	    	.marshal().json(JsonLibrary.Jackson).convertBodyTo(String.class)
 	    	.to("file:" + temporaryDirectory)
-	    	.to("websocket://localhost:8095/tweetsTrends?sendToAll=true");
+	    	.toF("websocket://0.0.0.0:%s/tweetsTrends?sendToAll=true", port);
 	}	
 }

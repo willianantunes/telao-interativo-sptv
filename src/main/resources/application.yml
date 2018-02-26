@@ -31,6 +31,8 @@ custom.scheduler.delay-each-read: 10000
 
 custom.brokerURL: tcp://localhost:61616?jms.prefetchPolicy.all=1
 
+custom.websocket-port: 8095
+
 ---
 
 spring:
