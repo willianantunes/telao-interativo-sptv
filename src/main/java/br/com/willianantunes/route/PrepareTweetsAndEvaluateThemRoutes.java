@@ -10,6 +10,7 @@ import br.com.willianantunes.model.TwitterMessage;
 /**
  * @see <a href="https://github.com/apache/camel/blob/master/camel-core/src/main/docs/scheduler-component.adoc">Scheduler Component</a>
  * @see <a href="https://github.com/apache/camel/blob/master/components/camel-jpa/src/main/docs/jpa-component.adoc">JPA Component</a>
+ * @see <a href="https://github.com/apache/camel/blob/master/components/camel-jms/src/main/docs/jms-component.adoc#using-activemq">Using ActiveMQ</a>
  */
 @Component
 public class PrepareTweetsAndEvaluateThemRoutes extends RouteBuilder {

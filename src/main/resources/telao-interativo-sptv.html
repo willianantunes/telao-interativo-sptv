@@ -48,8 +48,10 @@ $(document).ready(function(){
 		console.log('A message from the Twitter account ' + message.userName + ' has arrived!');
 		
 		window.insertMyTweet(message);
-		var n = $(document).height();
-	    $('html, body').animate({ scrollTop: n }, 1000);
+		
+		// If you use scroll you might be stuck cause of the volume of messages
+		// var n = $(document).height();
+	    // $('html, body').animate({ scrollTop: n }, 1000);
 	}
 
 	

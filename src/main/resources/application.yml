@@ -25,7 +25,7 @@ camel.component.twitter.access-token: YOUR-ACCESS-TOKEN
 camel.component.twitter.access-token-secret: YOUR-ACESS-TOKEN-SECRET
 
 custom.twitter.delay-each-request: 6000
-custom.twitter.keywords: "#SP1"
+custom.twitter.keywords: "#BDSP"
 
 custom.scheduler.delay-each-read: 10000
 
