@@ -33,98 +33,96 @@ import twitter4j.User;
 @UseAdviceWith
 @SpringBootTest
 public class PersistRelevantTweetsRouteTest {
-	
-	@Autowired
-	private ModelCamelContext camelContext;
+
+    @Autowired
+    private ModelCamelContext camelContext;
     @Autowired
     private ProducerTemplate producerTemplate;
-    
+
     @EndpointInject(uri = "mock:result-before-insert")
     private MockEndpoint mockedResultBeforeInsert;
     @EndpointInject(uri = "mock:result-after-insert")
-    private MockEndpoint mockedResultAfterInsert;    
-    
-	@Before
-	public void setUp() throws Exception {
-		if (!camelContext.getStatus().isStarted()) {
-			prepareCamelEnvironment();
-		}
-	}
+    private MockEndpoint mockedResultAfterInsert;
 
-	@Test
-	public void shouldDetectRoute() {
-		Route route = camelContext.getRoute(PersistRelevantTweetsRoute.ROUTE_ID);
+    @Before
+    public void setUp() throws Exception {
+        if (!camelContext.getStatus().isStarted()) {
+            prepareCamelEnvironment();
+        }
+    }
 
-		Assertions.assertThat(route).isNotNull();
-	}
-	
-	@Test
-	public void tweetIsReadAndPersisted() throws InterruptedException {
-		Status sampleTweet = generateFooStatus();
-		mockedResultBeforeInsert.expectedMessageCount(1);
-				
-		producerTemplate.sendBody("direct:twitter-search", sampleTweet);
-		
-		// See you can use MockEndpoint to verify assertions, but why not use something better like AssertJ (more readable)
-		mockedResultBeforeInsert.assertIsSatisfied();
-		
-		Assertions.assertThat(mockedResultBeforeInsert.getReceivedExchanges())
-			.hasSize(1)
-			.allSatisfy(e -> {
-				TwitterMessage body = e.getIn().getBody(TwitterMessage.class);
-				
-				Assertions.assertThat(body.getId()).isNull();
-				Assertions.assertThat(body.getUserName()).isEqualTo(sampleTweet.getUser().getName());
-				Assertions.assertThat(body.getScreenName()).isEqualTo(sampleTweet.getUser().getScreenName());
-				Assertions.assertThat(body.getText()).isEqualTo(sampleTweet.getText());
-				Assertions.assertThat(body.getCreatedAt()).isEqualTo(LocalDateTime.ofInstant(sampleTweet.getCreatedAt().toInstant(), ZoneId.systemDefault()));
-			});
-		
-		Assertions.assertThat(mockedResultAfterInsert.getReceivedExchanges())
-			.hasSize(1)
-			.allSatisfy(e -> {
-				TwitterMessage body = e.getIn().getBody(TwitterMessage.class);
-				
-				Assertions.assertThat(body.getId())
-					.isNotNull().isEqualTo(1);
-			});		
-	}
-	
-	private Status generateFooStatus() {
-		Status mock = Mockito.mock(Status.class);
-		
-		Mockito.when(mock.getUser()).thenAnswer(i -> {
-			User fooUser = Mockito.mock(User.class);
-			Mockito.when(fooUser.getName()).thenReturn("Foo Name");
-			Mockito.when(fooUser.getScreenName()).thenReturn("Foo Screen Name");
-			return fooUser;
-		});
-		
-		Mockito.when(mock.getCreatedAt()).thenReturn(Date.from(Instant.now()));
-		Mockito.when(mock.getText()).thenReturn("This is a Tweet written by Foo");
-		
-		return mock;
-	}
+    @Test
+    public void shouldDetectRoute() {
+        Route route = camelContext.getRoute(PersistRelevantTweetsRoute.ROUTE_ID);
 
-	private void prepareCamelEnvironment() throws Exception {
-		camelContext.getRouteDefinition(PersistRelevantTweetsRoute.ROUTE_ID).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
-			@Override
-			public void configure() throws Exception {
-				replaceFromWith("direct:twitter-search"); 
-				weaveByToUri("jpa*").before().to("mock:result-before-insert");
-				weaveByToUri("jpa*").after().to("mock:result-after-insert");
-			}
-		});
-		
-		camelContext.getRouteDefinition(ReadQueueAndSaveEachMessageRoute.ROUTE_ID).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
-			@Override
-			public void configure() throws Exception {
-				replaceFromWith("direct:read-activemq");
-				weaveByToUri("websocket://localhost:8095/tweetsTrends?sendToAll=true")
-					.replace().to("direct:websocket-server");
-			}
-		});	
-		
-		camelContext.start();
-	}	
+        Assertions.assertThat(route).isNotNull();
+    }
+
+    @Test
+    public void tweetIsReadAndPersisted() throws InterruptedException {
+        Status sampleTweet = generateFooStatus();
+        mockedResultBeforeInsert.expectedMessageCount(1);
+
+        producerTemplate.sendBody("direct:twitter-search", sampleTweet);
+
+        // See you can use MockEndpoint to verify assertions, but why not use something better like AssertJ (more readable)
+        mockedResultBeforeInsert.assertIsSatisfied();
+
+        Assertions.assertThat(mockedResultBeforeInsert.getReceivedExchanges()).hasSize(1).allSatisfy(e -> {
+            TwitterMessage body = e.getIn().getBody(TwitterMessage.class);
+
+            Assertions.assertThat(body.getId()).isNull();
+            Assertions.assertThat(body.getUserName()).isEqualTo(sampleTweet.getUser().getName());
+            Assertions.assertThat(body.getScreenName()).isEqualTo(sampleTweet.getUser().getScreenName());
+            Assertions.assertThat(body.getText()).isEqualTo(sampleTweet.getText());
+            Assertions.assertThat(body.getCreatedAt())
+                    .isEqualTo(LocalDateTime.ofInstant(sampleTweet.getCreatedAt().toInstant(), ZoneId.systemDefault()));
+        });
+
+        Assertions.assertThat(mockedResultAfterInsert.getReceivedExchanges()).hasSize(1).allSatisfy(e -> {
+            TwitterMessage body = e.getIn().getBody(TwitterMessage.class);
+
+            Assertions.assertThat(body.getId()).isNotNull().isEqualTo(1);
+        });
+    }
+
+    private Status generateFooStatus() {
+        Status mock = Mockito.mock(Status.class);
+
+        Mockito.when(mock.getUser()).thenAnswer(i -> {
+            User fooUser = Mockito.mock(User.class);
+            Mockito.when(fooUser.getName()).thenReturn("Foo Name");
+            Mockito.when(fooUser.getScreenName()).thenReturn("Foo_Screen_Name");
+            return fooUser;
+        });
+
+        Mockito.when(mock.getCreatedAt()).thenReturn(Date.from(Instant.now()));
+        Mockito.when(mock.getText()).thenReturn("This is a Tweet written by Foo");
+
+        return mock;
+    }
+
+    private void prepareCamelEnvironment() throws Exception {
+        camelContext.getRouteDefinition(PersistRelevantTweetsRoute.ROUTE_ID).adviceWith(camelContext,
+                new AdviceWithRouteBuilder() {
+                    @Override
+                    public void configure() throws Exception {
+                        replaceFromWith("direct:twitter-search");
+                        weaveByToUri("jpa*").before().to("mock:result-before-insert");
+                        weaveByToUri("jpa*").after().to("mock:result-after-insert");
+                    }
+                });
+
+        camelContext.getRouteDefinition(ReadQueueAndSaveEachMessageRoute.ROUTE_ID).adviceWith(camelContext,
+                new AdviceWithRouteBuilder() {
+                    @Override
+                    public void configure() throws Exception {
+                        replaceFromWith("direct:read-activemq");
+                        weaveByToUri("websocket://localhost:8095/tweetsTrends?sendToAll=true").replace()
+                                .to("direct:websocket-server");
+                    }
+                });
+
+        camelContext.start();
+    }
 }

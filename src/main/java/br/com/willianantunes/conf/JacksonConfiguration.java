@@ -12,14 +12,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 public class JacksonConfiguration {
-	
+
     @Autowired
     private JacksonDataFormatConfiguration configuration;
-    
+
     @PostConstruct
     public void setUp() {
-    	configuration.setDisableFeatures(String.format("%s,%s", DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.name(), SerializationFeature.WRITE_DATES_AS_TIMESTAMPS.name()));
-    	configuration.setModuleClassNames(JavaTimeModule.class.getName());
-        configuration.setPrettyPrint(true);    	
+        configuration
+                .setDisableFeatures(String.format("%s,%s", DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.name(),
+                        SerializationFeature.WRITE_DATES_AS_TIMESTAMPS.name()));
+        configuration.setModuleClassNames(JavaTimeModule.class.getName());
+        configuration.setPrettyPrint(true);
     }
 }

@@ -38,110 +38,114 @@ import br.com.willianantunes.support.ScenarioBuilder;
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = PortMappingInitializer.class)
 public class PrepareTweetsAndEvaluateThemRoutesIT {
-    private static DockerComposeRule docker = DockerComposeRule.builder()
-            .file("src/test/resources/docker-compose.yml")
-            .waitingForService("activemq", HealthChecks.toHaveAllPortsOpen())
-            .build();
-    
+    private static DockerComposeRule docker = DockerComposeRule.builder().file("src/test/resources/docker-compose.yml")
+            .waitingForService("activemq", HealthChecks.toHaveAllPortsOpen()).build();
+
     @ClassRule
     public static TestRule exposePortMappings = RuleChain.outerRule(docker).around(new PropagateDockerRule(docker));
-    
-	@Autowired
-	private ModelCamelContext camelContext;
+
     @Autowired
-    private ProducerTemplate producerTemplate;	
-	@Autowired
-	private ScenarioBuilder scenarioBuilder;
-	
+    private ModelCamelContext camelContext;
+    @Autowired
+    private ProducerTemplate producerTemplate;
+    @Autowired
+    private ScenarioBuilder scenarioBuilder;
+
     @EndpointInject(uri = "mock:result-fist-route-id-queue")
     private MockEndpoint mockedResultFirstRouteIdQueue;
     @EndpointInject(uri = "mock:result-before-activemq-route-id-queue")
-    private MockEndpoint mockedResultBeforeActiveMQFilterRouteIdQueue;    
-	
-	@Before
-	public void setUp() throws Exception {
-		if (!camelContext.getStatus().isStarted()) {
-			prepareCamelEnvironment();
-		}
-	}	
-    
-	@Test
-	public void shouldDetectRoutes() {
-		Route routeMessageCounter = camelContext.getRoute(PrepareTweetsAndEvaluateThemRoutes.ROUTE_ID_MESSAGE_COUNTER);
-		Route routeQueue = camelContext.getRoute(PrepareTweetsAndEvaluateThemRoutes.ROUTE_ID_QUEUE);
+    private MockEndpoint mockedResultBeforeActiveMQFilterRouteIdQueue;
 
-		Assertions.assertThat(routeMessageCounter).isNotNull();
-		Assertions.assertThat(routeQueue).isNotNull();
-	}
-	
-	@Test	
-	public void messagesAreForwardedToQueueRouteAndNotQueued() {
-		scenarioBuilder.unbuild().prepareDummyTweets(15).build();
-		producerTemplate.sendBody("direct:evaluate-database", null);
-		
-		Optional<Exchange> storageFromFirstNode = Optional.ofNullable(Iterables.getLast(mockedResultFirstRouteIdQueue.getReceivedExchanges(), null));
-		Optional<Exchange> storageFromBeforeActiveMQ = Optional.ofNullable(Iterables.getLast(mockedResultBeforeActiveMQFilterRouteIdQueue.getReceivedExchanges(), null));
-		
-		Assertions.assertThat(storageFromBeforeActiveMQ.isPresent()).isFalse();
-		Assertions.assertThat(storageFromFirstNode.isPresent()).isTrue();
-		Assertions.assertThat(storageFromFirstNode.get())
-			.satisfies(e -> {
-				Assertions.assertThat(e.getIn().getBody(List.class))
-					.hasSize(scenarioBuilder.getTwitterMessages().size());
-			});
-		Assertions.assertThat(scenarioBuilder.allTwitterMessagesSaved()).hasSize(scenarioBuilder.getTwitterMessages().size());
-	}
-	
-	@Test
-	public void messagesAreForwardToQueueRouteAndQueuedAndRepositoryIsEmpty() {
-		scenarioBuilder.unbuild().prepareDummyTweets(16).build();
-		producerTemplate.sendBody("direct:evaluate-database", null);
-		
-		Optional<Exchange> storageFromFirstNode = Optional.ofNullable(Iterables.getLast(mockedResultFirstRouteIdQueue.getReceivedExchanges(), null));
-		Optional<Exchange> storageFromBeforeActiveMQ = Optional.ofNullable(Iterables.getLast(mockedResultBeforeActiveMQFilterRouteIdQueue.getReceivedExchanges(), null));
-		
-		Assertions.assertThat(storageFromBeforeActiveMQ.isPresent()).isTrue();
-		Assertions.assertThat(storageFromFirstNode.isPresent()).isTrue();
-		Assertions.assertThat(storageFromFirstNode.get())
-			.satisfies(e -> {
-				Assertions.assertThat(e.getIn().getBody(List.class))
-					.hasSize(scenarioBuilder.getTwitterMessages().size());
-			});		
-		Assertions.assertThat(scenarioBuilder.allTwitterMessagesSaved()).isEmpty();
-	}
-	
-	private void prepareCamelEnvironment() throws Exception {
-		camelContext.getRouteDefinition(PersistRelevantTweetsRoute.ROUTE_ID).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
-			@Override
-			public void configure() throws Exception {
-				replaceFromWith("direct:twitter-search"); 
-			}
-		});
-		
-		camelContext.getRouteDefinition(ReadQueueAndSaveEachMessageRoute.ROUTE_ID).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
-			@Override
-			public void configure() throws Exception {
-				replaceFromWith("direct:read-activemq"); 
-				weaveByToUri("websocket://localhost:8095/tweetsTrends?sendToAll=true")
-					.replace().to("direct:websocket-server");				
-			}
-		});		
-		
-		camelContext.getRouteDefinition(PrepareTweetsAndEvaluateThemRoutes.ROUTE_ID_MESSAGE_COUNTER).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
-			@Override
-			public void configure() throws Exception {
-				replaceFromWith("direct:evaluate-database"); 
-			}
-		});
-		
-		camelContext.getRouteDefinition(PrepareTweetsAndEvaluateThemRoutes.ROUTE_ID_QUEUE).adviceWith(camelContext, new AdviceWithRouteBuilder() {			
-			@Override
-			public void configure() throws Exception {
-				weaveAddFirst().to("mock:result-fist-route-id-queue");
-				interceptSendToEndpoint("activemq:queue:Tweets.Trends").to("mock:result-before-activemq-route-id-queue");
-			}
-		});			
-		
-		camelContext.start();
-	}	
+    @Before
+    public void setUp() throws Exception {
+        if (!camelContext.getStatus().isStarted()) {
+            prepareCamelEnvironment();
+        }
+    }
+
+    @Test
+    public void shouldDetectRoutes() {
+        Route routeMessageCounter = camelContext.getRoute(PrepareTweetsAndEvaluateThemRoutes.ROUTE_ID_MESSAGE_COUNTER);
+        Route routeQueue = camelContext.getRoute(PrepareTweetsAndEvaluateThemRoutes.ROUTE_ID_QUEUE);
+
+        Assertions.assertThat(routeMessageCounter).isNotNull();
+        Assertions.assertThat(routeQueue).isNotNull();
+    }
+
+    @Test
+    public void messagesAreForwardedToQueueRouteAndNotQueued() {
+        scenarioBuilder.unbuild().prepareDummyTweets(15).build();
+        producerTemplate.sendBody("direct:evaluate-database", null);
+
+        Optional<Exchange> storageFromFirstNode = Optional
+                .ofNullable(Iterables.getLast(mockedResultFirstRouteIdQueue.getReceivedExchanges(), null));
+        Optional<Exchange> storageFromBeforeActiveMQ = Optional.ofNullable(
+                Iterables.getLast(mockedResultBeforeActiveMQFilterRouteIdQueue.getReceivedExchanges(), null));
+
+        Assertions.assertThat(storageFromBeforeActiveMQ.isPresent()).isFalse();
+        Assertions.assertThat(storageFromFirstNode.isPresent()).isTrue();
+        Assertions.assertThat(storageFromFirstNode.get()).satisfies(e -> {
+            Assertions.assertThat(e.getIn().getBody(List.class)).hasSize(scenarioBuilder.getTwitterMessages().size());
+        });
+        Assertions.assertThat(scenarioBuilder.allTwitterMessagesSaved())
+                .hasSize(scenarioBuilder.getTwitterMessages().size());
+    }
+
+    @Test
+    public void messagesAreForwardToQueueRouteAndQueuedAndRepositoryIsEmpty() {
+        scenarioBuilder.unbuild().prepareDummyTweets(16).build();
+        producerTemplate.sendBody("direct:evaluate-database", null);
+
+        Optional<Exchange> storageFromFirstNode = Optional
+                .ofNullable(Iterables.getLast(mockedResultFirstRouteIdQueue.getReceivedExchanges(), null));
+        Optional<Exchange> storageFromBeforeActiveMQ = Optional.ofNullable(
+                Iterables.getLast(mockedResultBeforeActiveMQFilterRouteIdQueue.getReceivedExchanges(), null));
+
+        Assertions.assertThat(storageFromBeforeActiveMQ.isPresent()).isTrue();
+        Assertions.assertThat(storageFromFirstNode.isPresent()).isTrue();
+        Assertions.assertThat(storageFromFirstNode.get()).satisfies(e -> {
+            Assertions.assertThat(e.getIn().getBody(List.class)).hasSize(scenarioBuilder.getTwitterMessages().size());
+        });
+        Assertions.assertThat(scenarioBuilder.allTwitterMessagesSaved()).isEmpty();
+    }
+
+    private void prepareCamelEnvironment() throws Exception {
+        camelContext.getRouteDefinition(PersistRelevantTweetsRoute.ROUTE_ID).adviceWith(camelContext,
+                new AdviceWithRouteBuilder() {
+                    @Override
+                    public void configure() throws Exception {
+                        replaceFromWith("direct:twitter-search");
+                    }
+                });
+
+        camelContext.getRouteDefinition(ReadQueueAndSaveEachMessageRoute.ROUTE_ID).adviceWith(camelContext,
+                new AdviceWithRouteBuilder() {
+                    @Override
+                    public void configure() throws Exception {
+                        replaceFromWith("direct:read-activemq");
+                        weaveByToUri("websocket://localhost:8095/tweetsTrends?sendToAll=true").replace()
+                                .to("direct:websocket-server");
+                    }
+                });
+
+        camelContext.getRouteDefinition(PrepareTweetsAndEvaluateThemRoutes.ROUTE_ID_MESSAGE_COUNTER)
+                .adviceWith(camelContext, new AdviceWithRouteBuilder() {
+                    @Override
+                    public void configure() throws Exception {
+                        replaceFromWith("direct:evaluate-database");
+                    }
+                });
+
+        camelContext.getRouteDefinition(PrepareTweetsAndEvaluateThemRoutes.ROUTE_ID_QUEUE).adviceWith(camelContext,
+                new AdviceWithRouteBuilder() {
+                    @Override
+                    public void configure() throws Exception {
+                        weaveAddFirst().to("mock:result-fist-route-id-queue");
+                        interceptSendToEndpoint("activemq:queue:Tweets.Trends")
+                                .to("mock:result-before-activemq-route-id-queue");
+                    }
+                });
+
+        camelContext.start();
+    }
 }

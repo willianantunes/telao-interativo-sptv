@@ -12,20 +12,20 @@ import com.palantir.docker.compose.DockerComposeRule;
  */
 public final class PropagateDockerRule implements TestRule {
 
-	private final DockerComposeRule docker;
+    private final DockerComposeRule docker;
 
-	public PropagateDockerRule(final DockerComposeRule docker) {
-		this.docker = docker;
-	}
+    public PropagateDockerRule(final DockerComposeRule docker) {
+        this.docker = docker;
+    }
 
-	@Override
-	public Statement apply(final Statement base, final Description description) {
-		return new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				PortMappingInitializer.DOCKER.set(docker);
-				base.evaluate();
-			}
-		};
-	}
+    @Override
+    public Statement apply(final Statement base, final Description description) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                PortMappingInitializer.DOCKER.set(docker);
+                base.evaluate();
+            }
+        };
+    }
 }

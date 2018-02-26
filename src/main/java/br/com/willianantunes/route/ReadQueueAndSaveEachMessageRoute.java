@@ -7,25 +7,28 @@ import org.springframework.stereotype.Component;
 
 import br.com.willianantunes.model.TwitterMessage;
 
+/**
+ * @see <a href="https://github.com/apache/camel/blob/master/components/camel-websocket/src/main/docs/websocket-component.adoc">Jetty Websocket Component</a>
+ * @see <a href="https://github.com/apache/camel/blob/master/camel-core/src/main/docs/file-language.adoc">File Language</a>
+ */
 @Component
 public class ReadQueueAndSaveEachMessageRoute extends RouteBuilder {
-	
-	public static final String ROUTE_ID = "ConsumerTweetQueueRoute";
-	
-	@PropertyInject("custom.websocket-port")
-	private String port;	
 
-	private String temporaryDirectory = System.getProperty("java.io.tmpdir");
-	
-	@Override
-	public void configure() throws Exception {
-        from("activemq:queue:Tweets.Trends")
-	    	.routeId(ROUTE_ID)
-	    	.unmarshal().json(JsonLibrary.Jackson, TwitterMessage.class)
-	    	.log("The following twitter user is passing by: ${body.userName}")
-	    	.setHeader("CamelFileName", simple("${body.userName}-${date:now:yyyyMMdd-hhmmss}.json"))
-	    	.marshal().json(JsonLibrary.Jackson).convertBodyTo(String.class)
-	    	.to("file:" + temporaryDirectory)
-	    	.toF("websocket://0.0.0.0:%s/tweetsTrends?sendToAll=true&staticResources=classpath:.", port);
-	}	
+    public static final String ROUTE_ID = "ConsumerTweetQueueRoute";
+
+    @PropertyInject("custom.websocket-port")
+    private String port;
+
+    private String temporaryDirectory = System.getProperty("java.io.tmpdir");
+
+    @Override
+    public void configure() throws Exception {
+        from("activemq:queue:Tweets.Trends").routeId(ROUTE_ID).unmarshal()
+            .json(JsonLibrary.Jackson, TwitterMessage.class)
+            .log("The following twitter user is passing by: ${body.userName}")
+            .setHeader("CamelFileName", simple("${body.userName}-${date:now:yyyyMMdd-hhmmss}.json"))
+            .marshal().json(JsonLibrary.Jackson).convertBodyTo(String.class)
+            .to("file:" + temporaryDirectory)
+            .toF("websocket://0.0.0.0:%s/tweetsTrends?sendToAll=true&staticResources=classpath:.", port);
+    }
 }

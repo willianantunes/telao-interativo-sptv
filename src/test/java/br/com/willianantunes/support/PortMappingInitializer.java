@@ -16,24 +16,24 @@ import com.palantir.docker.compose.connection.Container;
  */
 public final class PortMappingInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-	static final ThreadLocal<DockerComposeRule> DOCKER = ThreadLocal.withInitial(() -> null);
+    static final ThreadLocal<DockerComposeRule> DOCKER = ThreadLocal.withInitial(() -> null);
 
-	@Override
-	public void initialize(final ConfigurableApplicationContext applicationContext) {
-		final DockerComposeRule docker = DOCKER.get();
+    @Override
+    public void initialize(final ConfigurableApplicationContext applicationContext) {
+        final DockerComposeRule docker = DOCKER.get();
 
-		if (docker != null) {
-			try {
-				final ConfigurableEnvironment environment = applicationContext.getEnvironment();
-				for (Container container : docker.containers().allContainers()) {
-					container.ports().stream().forEach(p -> {
-						TestPropertySourceUtils.addInlinedPropertiesToEnvironment(environment,
-								container.getContainerName() + ".port = " + p.getExternalPort());
-					});
-				}
-			} catch (InterruptedException | IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
+        if (docker != null) {
+            try {
+                final ConfigurableEnvironment environment = applicationContext.getEnvironment();
+                for (Container container : docker.containers().allContainers()) {
+                    container.ports().stream().forEach(p -> {
+                        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(environment,
+                                container.getContainerName() + ".port = " + p.getExternalPort());
+                    });
+                }
+            } catch (InterruptedException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }

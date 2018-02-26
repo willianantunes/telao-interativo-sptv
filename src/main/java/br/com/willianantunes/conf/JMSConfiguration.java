@@ -8,15 +8,15 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JMSConfiguration {
-	
-	@Value("${custom.brokerURL}")
-	private String brokerURL;
-	
-	@Bean
-	public ActiveMQComponent activeMQComponent() {
-		ActiveMQConfiguration activeMQConfiguration = new ActiveMQConfiguration();
-		activeMQConfiguration.setBrokerURL(brokerURL);
-		
-		return new ActiveMQComponent(activeMQConfiguration);
-	}
+
+    @Value("${custom.brokerURL}")
+    private String brokerURL;
+
+    @Bean
+    public ActiveMQComponent activeMQComponent() {
+        ActiveMQConfiguration activeMQConfiguration = new ActiveMQConfiguration();
+        activeMQConfiguration.setBrokerURL(brokerURL);
+
+        return new ActiveMQComponent(activeMQConfiguration);
+    }
 }
