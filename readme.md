@@ -1,6 +1,11 @@
 
 # Telão interativo estilo SPTV a partir do Twitter
 
+
+[![Build Status](https://travis-ci.org/willianantunes/telao-interativo-sptv.svg?branch=master)](https://travis-ci.org/willianantunes/telao-interativo-sptv)
+
+---
+
 Parte final do tutorial que foi iniciado a partir do repositório [twitter-sniffer](https://github.com/willianantunes/twitter-sniffer) e da postagem _[Apache Camel e Twitter: Orquestrando mensagens](http://willianantunes.blogspot.com.br/2017/05/apache-camel-e-twitter-orquestrando.html)_. O projeto foi totalmente atualizado tanto para casar com a última versão existente das libs quanto para ajeitá-lo de uma maneira geral (inclusão de testes, configs centralizadas, organização de rotas, etc.).
 
 Acesse meu blog e conheça mais os pormenores desse projeto na postagem _[Telão interativo estilo SPTV com Apache Camel](http://willianantunes.blogspot.com.br/2018/02/telao-interativo-sptv-apache-camel.html)_.
