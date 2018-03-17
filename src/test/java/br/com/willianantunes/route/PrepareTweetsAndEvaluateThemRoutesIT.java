@@ -12,6 +12,7 @@ import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
+import org.apache.camel.test.spring.EnableRouteCoverage;
 import org.apache.camel.test.spring.UseAdviceWith;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -38,6 +39,7 @@ import br.com.willianantunes.support.ScenarioBuilder;
 @SpringBootTest
 @ActiveProfiles("it")
 @ContextConfiguration(initializers = PortMappingInitializer.class)
+@EnableRouteCoverage
 public class PrepareTweetsAndEvaluateThemRoutesIT {
     private static DockerComposeRule docker = DockerComposeRule.builder().file("src/test/resources/docker-compose.yml")
             .waitingForService("activemq", HealthChecks.toHaveAllPortsOpen()).build();

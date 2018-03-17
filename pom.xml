@@ -14,7 +14,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <spring.boot-version>1.5.10.RELEASE</spring.boot-version>
-        <camel-version>2.20.2</camel-version>
+        <camel-version>2.21.0</camel-version>
     </properties>
 
     <dependencyManagement>
@@ -161,6 +161,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-maven-plugin</artifactId>
+                <version>${camel-version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

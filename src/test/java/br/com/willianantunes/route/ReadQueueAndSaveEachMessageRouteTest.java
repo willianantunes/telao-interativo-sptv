@@ -20,6 +20,7 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.test.AvailablePortFinder;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
+import org.apache.camel.test.spring.EnableRouteCoverage;
 import org.apache.camel.test.spring.UseAdviceWith;
 import org.assertj.core.api.Assertions;
 import org.asynchttpclient.AsyncHttpClient;
@@ -38,6 +39,7 @@ import com.google.common.collect.Iterables;
 @RunWith(CamelSpringBootRunner.class)
 @UseAdviceWith
 @SpringBootTest
+@EnableRouteCoverage
 public class ReadQueueAndSaveEachMessageRouteTest {
 
     @Autowired

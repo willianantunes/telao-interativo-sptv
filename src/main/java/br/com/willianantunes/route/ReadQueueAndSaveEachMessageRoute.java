@@ -23,11 +23,13 @@ public class ReadQueueAndSaveEachMessageRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        from("activemq:queue:Tweets.Trends").routeId(ROUTE_ID).unmarshal()
-            .json(JsonLibrary.Jackson, TwitterMessage.class)
+        from("activemq:queue:Tweets.Trends").routeId(ROUTE_ID)
+            .unmarshal()
+                .json(JsonLibrary.Jackson, TwitterMessage.class)
             .log("The following twitter user is passing by: ${body.userName}")
             .setHeader("CamelFileName", simple("${body.userName}-${date:now:yyyyMMdd-hhmmss}.json"))
-            .marshal().json(JsonLibrary.Jackson).convertBodyTo(String.class)
+            .marshal()
+                .json(JsonLibrary.Jackson).convertBodyTo(String.class)
             .to("file:" + temporaryDirectory)
             .toF("websocket://0.0.0.0:%s/tweetsTrends?sendToAll=true&staticResources=classpath:.", port);
     }

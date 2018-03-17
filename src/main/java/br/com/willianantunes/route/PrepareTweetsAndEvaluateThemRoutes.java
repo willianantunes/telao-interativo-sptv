@@ -33,15 +33,16 @@ public class PrepareTweetsAndEvaluateThemRoutes extends RouteBuilder {
                 .log("We have 1 tweet message up until now...")
             .endChoice();
 
-        from("direct:informMyQueue").routeId(ROUTE_ID_QUEUE).filter(simple("${body.size} > 15"))
-            .log("Taking a List of TwitterMessages and creating one message by each element...")
-            .split(body())
-            .setHeader("id", simple("${body.id}"))
-            .marshal().json(JsonLibrary.Jackson).convertBodyTo(String.class)
-            .to("activemq:queue:Tweets.Trends")
-            .log("All of the rows were sent to the queue Tweets.Trends")
-            .toD(String.format("jpa:%s?namedQuery=%s&useExecuteUpdate=%s&parameters={\"id\":${headers.id}}",
-                    TwitterMessage.class.getName(), TwitterMessage.NAMED_QUERY_DELETE_ONE, true))
-            .log("TwitterMessage with id ${headers.id} was deleted...");
+        from("direct:informMyQueue").routeId(ROUTE_ID_QUEUE)
+            .filter(simple("${body.size} > 15"))
+                .log("Taking a List of TwitterMessages and creating one message by each element...")
+                .split(body())
+                .setHeader("id", simple("${body.id}"))
+                .marshal().json(JsonLibrary.Jackson).convertBodyTo(String.class)
+                .to("activemq:queue:Tweets.Trends")
+                .log("All of the rows were sent to the queue Tweets.Trends")
+                .toD(String.format("jpa:%s?namedQuery=%s&useExecuteUpdate=%s&parameters={\"id\":${headers.id}}",
+                        TwitterMessage.class.getName(), TwitterMessage.NAMED_QUERY_DELETE_ONE, true))
+                .log("TwitterMessage with id ${headers.id} was deleted...");
     }
 }
